@@ -1,0 +1,68 @@
+services:
+  train-script:
+    build:
+      context: .
+      dockerfile: ./docker/model_train/Dockerfile
+      args:
+        MODEL_TYPE: XCEPTION
+        CUSTOM_MODEL: 'False'
+        GENERIC_MODEL: 'False'
+        WAVELET_FAMILY: 'None'
+        CALIBER: "9MM"
+        CLASSES_CARTRIDGES_CSV_FILE: "9mm_models_cases_count.csv"
+        CLASSES_CASEIDS_JSON_FILE: "9mm_case_ids_per_model.json"
+        SMALL_DATASET: 'True'
+        SMALL_TRAIN_SIZE: 100
+        SMALL_VALIDATION_SIZE: 50
+        FINETUNE_MODELS: 'False'
+        TRAIN_EPOCHS: 10
+        BASE_LEARNING_RATE: 0.01
+
+
+  train-siamese-script:
+    build:
+      context: .
+      dockerfile: ./docker/siamese_train/Dockerfile
+      args:
+        CALIBER: "9MM"
+        CLASSES_CARTRIDGES_CSV_FILE: "9mm_models_cases_count.csv"
+        CLASSES_CASEIDS_JSON_FILE: "9mm_case_ids_per_model.json"
+        SMALL_DATASET: 'False'
+        SMALL_TRAIN_SIZE: 20
+        SMALL_VALIDATION_SIZE: 8
+        TRAIN_EPOCHS: 5
+        BASE_LEARNING_RATE: 0.01
+
+
+  test-script:
+    build:
+      context: .
+      dockerfile: ./docker/model_test/Dockerfile
+      args:
+        MODEL_TYPE: XCEPTION
+        CUSTOM_MODEL: 'False'
+        GENERIC_MODEL: 'False'
+        CALIBER: "9MM"
+        CLASSES_CARTRIDGES_CSV_FILE: "9mm_models_cases_count.csv"
+        CLASSES_CASEIDS_JSON_FILE: "9mm_case_ids_per_model.json"
+        PLOT_IMAGES_ENABLED: 'True'
+        EVAL_ENABLED: 'True'
+        BASE_LEARNING_RATE: 0.01
+
+  test-siamese-script:
+    build:
+      context: .
+      dockerfile: ./docker/siamese_test/Dockerfile
+      args:
+        CALIBER: "9MM"
+        CLASSES_CARTRIDGES_CSV_FILE: "9mm_models_cases_count.csv"
+        CLASSES_CASEIDS_JSON_FILE: "9mm_case_ids_per_model.json"
+        PLOT_IMAGES_ENABLED: 'False'
+        EVAL_ENABLED: 'True'
+        BASE_LEARNING_RATE: 0.01
+
+
+  experiment:
+    build:
+      context: .
+      dockerfile: docker/experiment/Dockerfile

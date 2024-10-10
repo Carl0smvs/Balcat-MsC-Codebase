@@ -1,0 +1,127 @@
+services:
+  train-script:
+    build:
+      context: .
+      dockerfile: ./docker/model_train/Dockerfile
+      args:
+        MODEL_TYPE: $MODEL_TYPE
+        CI: $CI
+        TEST: $TEST
+        CUSTOM_MODEL: $CUSTOM_MODEL
+        GENERIC_MODEL: $GENERIC_MODEL
+        WAVELET_FAMILY: $WAVELET_FAMILY
+        CALIBER: $CALIBER
+        CLASSES_CARTRIDGES_CSV_FILE: $CLASSES_CARTRIDGES_CSV_FILE
+        CLASSES_CASEIDS_JSON_FILE: $CLASSES_CASEIDS_JSON_FILE
+        SAMPLING_MODE: 'UNDERSAMPLE'
+        SMALL_DATASET: 'False'
+        FINETUNE_MODELS: $FINETUNE_MODELS
+        TRAIN_EPOCHS: $TRAIN_EPOCHS
+        BASE_LEARNING_RATE: $BASE_LEARNING_RATE
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
+    volumes:
+      - /home/k01/BALCAT2-DATA:/dataset
+      - /data/balcat-carlos/models:/models
+
+
+  train-siamese-script:
+    build:
+      context: .
+      dockerfile: ./docker/siamese_train/Dockerfile
+      args:
+        CI: $CI
+        TEST: $TEST
+        CALIBER: $CALIBER
+        CLASSES_CARTRIDGES_CSV_FILE: $CLASSES_CARTRIDGES_CSV_FILE
+        CLASSES_CASEIDS_JSON_FILE: $CLASSES_CASEIDS_JSON_FILE
+        SAMPLING_MODE: 'UNDERSAMPLE'
+        SMALL_DATASET: 'False'
+        TRAIN_EPOCHS: $TRAIN_EPOCHS
+        BASE_LEARNING_RATE: $BASE_LEARNING_RATE
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
+    volumes:
+      - /home/k01/BALCAT2-DATA:/dataset
+      - /data/balcat-carlos/models:/models
+
+
+  test-script:
+    build:
+      context: .
+      dockerfile: ./docker/model_test/Dockerfile
+      args:
+        MODEL_TYPE: $MODEL_TYPE
+        CI: $CI
+        TEST: $TEST
+        CUSTOM_MODEL: $CUSTOM_MODEL
+        GENERIC_MODEL: $GENERIC_MODEL
+        WAVELET_FAMILY: $WAVELET_FAMILY
+        CALIBER: $CALIBER
+        CLASSES_CARTRIDGES_CSV_FILE: $CLASSES_CARTRIDGES_CSV_FILE
+        CLASSES_CASEIDS_JSON_FILE: $CLASSES_CASEIDS_JSON_FILE
+        PLOT_IMAGES_ENABLED: $PLOT_IMAGES_ENABLED
+        SAMPLING_MODE: 'UNDERSAMPLE'
+        EVAL_ENABLED: 'True'
+        BASE_LEARNING_RATE: $BASE_LEARNING_RATE
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
+    volumes:
+      - /home/k01/BALCAT2-DATA:/dataset
+      - /data/balcat-carlos:/data
+      - /data/balcat-carlos/models:/models
+
+
+  test-siamese-script:
+    build:
+      context: .
+      dockerfile: ./docker/siamese_test/Dockerfile
+      args:
+        CI: $CI
+        TEST: $TEST
+        CALIBER: $CALIBER
+        CLASSES_CARTRIDGES_CSV_FILE: $CLASSES_CARTRIDGES_CSV_FILE
+        CLASSES_CASEIDS_JSON_FILE: $CLASSES_CASEIDS_JSON_FILE
+        PLOT_IMAGES_ENABLED: $PLOT_IMAGES_ENABLED
+        SAMPLING_MODE: 'UNDERSAMPLE'
+        EVAL_ENABLED: 'True'
+        BASE_LEARNING_RATE: $BASE_LEARNING_RATE
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
+    volumes:
+      - /home/k01/BALCAT2-DATA:/dataset
+      - /data/balcat-carlos:/data
+      - /data/balcat-carlos/models:/models
+
+
+  experiment:
+    build:
+      context: .
+      dockerfile: docker/experiment/Dockerfile
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]

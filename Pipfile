@@ -1,0 +1,28 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+jupyter = "*"
+matplotlib = "==3.8.4"
+pydot = "*"
+opencv-python = "*"
+seaborn = "*"
+tensorflow-datasets = "==4.9.4"
+ipykernel = "*"
+tensorflow = "==2.15.1"
+scipy = "==1.11.4"
+scikit-learn = "*"
+scikit-plot = "*"
+environs = "*"
+mlflow = "*"
+imutils = "*"
+
+keras_cv = "*"
+tensorflow-wavelets = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.10"
