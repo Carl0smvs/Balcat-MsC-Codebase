@@ -1,0 +1,118 @@
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+  TEST: 'False'
+  CUSTOM_MODEL: 'True'
+  GENERIC_MODEL: 'False'
+  WAVELET_FAMILY: 'db1'
+  CALIBER: "9MM"
+  CLASSES_CARTRIDGES_CSV_FILE: "9mm_models_cases_count.csv"
+  CLASSES_CASEIDS_JSON_FILE: "9mm_case_ids_per_model.json"
+  MODEL_TYPE: 'EFFICIENT_NET_B0'
+  TRAIN_EPOCHS: 20
+  BASE_LEARNING_RATE: '0.01'
+  FINETUNE_MODELS: 'True'
+  PLOT_IMAGES_ENABLED: 'True'
+  CI: 'True'
+
+stages:
+  - train
+  - test
+  - train-siamese
+  - test-siamese
+  - exp
+
+.vars-matrix:
+  parallel:
+    matrix:
+      - CALIBER: "6.35MM"
+        CLASSES_CARTRIDGES_CSV_FILE: "6-35mm_models_cases_count.csv"
+        CLASSES_CASEIDS_JSON_FILE: "6-35mm_case_ids_per_model.json"
+        MODEL_TYPE: [ 'XCEPTION', 'VGG_16', 'EFFICIENT_NET_B0', 'INCEPTION_V3', 'DENSE_NET_121' ]
+        #WAVELET_FAMILY: [ 'db1', 'db10', 'db20', 'db30', 'sym2', 'sym10', 'sym20', 'coif1', 'coif8', 'coif16', 'bior1.1', 'bior3.1', 'bior6.8', 'rbio1.1', 'rbio3.1', 'rbio6.8', 'dmey' ]
+
+      - CALIBER: "7.65MM"
+        CLASSES_CARTRIDGES_CSV_FILE: "7-65mm_models_cases_count.csv"
+        CLASSES_CASEIDS_JSON_FILE: "7-65mm_case_ids_per_model.json"
+        MODEL_TYPE: [ 'XCEPTION', 'VGG_16', 'EFFICIENT_NET_B0', 'INCEPTION_V3', 'DENSE_NET_121' ]
+        #WAVELET_FAMILY: [ 'db1', 'db10', 'db20', 'db30', 'sym2', 'sym10', 'sym20', 'coif1', 'coif8', 'coif16', 'bior1.1', 'bior3.1', 'bior6.8', 'rbio1.1', 'rbio3.1', 'rbio6.8', 'dmey' ]
+
+      - CALIBER: "9MM"
+        CLASSES_CARTRIDGES_CSV_FILE: "9mm_models_cases_count.csv"
+        CLASSES_CASEIDS_JSON_FILE: "9mm_case_ids_per_model.json"
+        MODEL_TYPE: [ 'XCEPTION', 'VGG_16', 'EFFICIENT_NET_B0', 'INCEPTION_V3', 'DENSE_NET_121' ]
+        #WAVELET_FAMILY: [ 'db1', 'db10', 'db20', 'db30', 'sym2', 'sym10', 'sym20', 'coif1', 'coif8', 'coif16', 'bior1.1', 'bior3.1', 'bior6.8', 'rbio1.1', 'rbio3.1', 'rbio6.8', 'dmey' ]
+
+train-model-script:
+  stage: train
+  image: docker:24.0.5
+# To be used when training all models
+  extends: .vars-matrix
+  script:
+    - docker-compose 
+      -f docker-compose-ci.yml up --build train-script
+
+# To trigger the pipeline execution manually
+  when: manual
+  retry:
+    max: 2
+    when: job_execution_timeout
+  tags:
+    - runner@kluster01
+
+test-model-script:
+  stage: test
+  image: docker:24.0.5
+# To be used when training all models
+  extends: .vars-matrix
+  script:
+    - docker-compose 
+      -f docker-compose-ci.yml up --build test-script 
+
+# To trigger the pipeline execution manually
+#  when: manual
+  retry:
+    max: 2
+    when: job_execution_timeout
+  tags:
+    - runner@kluster01
+
+train-siamese-model-script:
+  stage: train-siamese
+  image: docker:24.0.5
+  script:
+    - docker-compose 
+      -f docker-compose-ci.yml up --build train-siamese-script
+
+# To trigger the pipeline execution manually
+  when: manual
+  retry:
+    max: 2
+    when: job_execution_timeout
+  tags:
+    - runner@kluster01
+
+test-siamese-model-script:
+  stage: test-siamese
+  image: docker:24.0.5
+  script:
+    - docker-compose 
+      -f docker-compose-ci.yml up --build test-siamese-script
+
+# To trigger the pipeline execution manually
+  when: manual
+  retry:
+    max: 2
+    when: job_execution_timeout
+  tags:
+    - runner@kluster01
+
+experiment:
+  stage: exp
+  image: docker:24.0.5
+  script:
+    - docker-compose -f docker-compose-ci.yml up --build experiment
+  only:
+    - main
+  when: manual
+  tags:
+    - runner@kluster01
